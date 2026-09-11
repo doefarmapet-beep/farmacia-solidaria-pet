@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DoeFarmaPet - Atualizar Cadastro</title>
+  
+  <!-- Estilo vindo do nível anterior -->
+  <link rel="stylesheet" href="../css/style.css">
+  
+  <!-- Fonte Google Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <main class="auth-container">
+    <div class="auth-card auth-card-wide">
+      
+      <div class="logo-container">
+        <img src="../img/logo.png" alt="Logo DoeFarmaPet" class="app-logo">
+      </div>
+
+      <div class="auth-header">
+        <h1>Atualizar Cadastro</h1>
+        <p>Altere as informações necessárias do seu perfil</p>
+      </div>
+
+      <form id="form-atualizar" onsubmit="salvarAtualizacao(event)">
+        
+        <div class="form-row">
+          <div class="input-group">
+            <label for="nome">Nome Completo</label>
+            <input type="text" id="nome" required placeholder="Seu nome completo">
+          </div>
+
+          <div class="input-group">
+            <label for="telefone">Telefone / WhatsApp</label>
+            <input type="tel" id="telefone" required placeholder="(81) 99999-9999">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" required placeholder="seu@email.com" autocomplete="email">
+          </div>
+
+          <div class="input-group">
+            <label for="data-nascimento">Data de Nascimento</label>
+            <input type="date" id="data-nascimento" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label for="cep">CEP <span class="cep-status" id="cep-status"></span></label>
+            <input type="text" id="cep" required placeholder="50000-000" maxlength="9" onblur="buscarCEP()">
+          </div>
+
+          <div class="input-group flex-2">
+            <label for="logradouro">Rua / Logradouro</label>
+            <input type="text" id="logradouro" required placeholder="Rua, Avenida..." readonly class="input-readonly">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label for="bairro">Bairro</label>
+            <input type="text" id="bairro" required placeholder="Bairro" readonly class="input-readonly">
+          </div>
+
+          <div class="input-group">
+            <label for="cidade">Cidade</label>
+            <input type="text" id="cidade" required placeholder="Cidade" readonly class="input-readonly">
+          </div>
+
+          <div class="input-group flex-small">
+            <label for="uf">UF</label>
+            <input type="text" id="uf" required placeholder="PE" readonly class="input-readonly">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group flex-small">
+            <label for="numero">Número</label>
+            <input type="text" id="numero" required placeholder="123">
+          </div>
+
+          <div class="input-group flex-2">
+            <label for="complemento">Complemento (Opcional)</label>
+            <input type="text" id="complemento" placeholder="Apto, Bloco, Ponto de referência">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label for="nova-senha">Nova Senha (deixe em branco para não alterar)</label>
+            <div class="password-wrapper">
+              <input type="password" id="nova-senha" placeholder="••••••••">
+              <button type="button" class="toggle-password" onclick="alternarVisibilidade('nova-senha', 'eye-icon-1')">
+                <span id="eye-icon-1">👁️</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="confirmar-senha">Confirmar Nova Senha</label>
+            <div class="password-wrapper">
+              <input type="password" id="confirmar-senha" placeholder="••••••••">
+              <button type="button" class="toggle-password" onclick="alternarVisibilidade('confirmar-senha', 'eye-icon-2')">
+                <span id="eye-icon-2">👁️</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">Salvar Alterações</button>
+
+      </form>
+
+      <div class="auth-footer">
+        <a href="login.html" class="forgot-link">Cancelar e Voltar ao Login</a>
+        <br>
+        <a href="../index.html" class="back-link">← Voltar para o início</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    function alternarVisibilidade(inputId, eyeId) {
+      const campo = document.getElementById(inputId);
+      const icone = document.getElementById(eyeId);
+
+      if (campo.type === 'password') {
+        campo.type = 'text';
+        icone.textContent = '🙈';
+      } else {
+        campo.type = 'password';
+        icone.textContent = '👁️';
+      }
+    }
+
+    function buscarCEP() {
+      const cepInput = document.getElementById('cep');
+      const cepStatus = document.getElementById('cep-status');
+      let cep = cepInput.value.replace(/\D/g, '');
+
+      if (cep.length === 8) {
+        cepStatus.textContent = "(Buscando...)";
+        cepStatus.style.color = "#0284c7";
+
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+          .then(response => response.json())
+          .then(data => {
+            if (!data.erro) {
+              document.getElementById('logradouro').value = data.logradouro;
+              document.getElementById('bairro').value = data.bairro;
+              document.getElementById('cidade').value = data.localidade;
+              document.getElementById('uf').value = data.uf;
+              
+              cepStatus.textContent = "(Localizado!)";
+              cepStatus.style.color = "#10b981";
+              document.getElementById('numero').focus();
+            } else {
+              cepStatus.textContent = "(CEP não encontrado)";
+              cepStatus.style.color = "#ef4444";
+            }
+          })
+          .catch(() => {
+            cepStatus.textContent = "(Erro na busca)";
+            cepStatus.style.color = "#ef4444";
+          });
+      }
+    }
+
+    function salvarAtualizacao(event) {
+      event.preventDefault();
+      const novaSenha = document.getElementById('nova-senha').value;
+      const confirmar = document.getElementById('confirmar-senha').value;
+
+      if (novaSenha !== "" && novaSenha !== confirmar) {
+        alert("As novas senhas não coincidem.");
+        return;
+      }
+
+      alert("Cadastro atualizado com sucesso!");
+      window.location.href = "login.html";
+    }
+  </script>
+
+</body>
+</html>
