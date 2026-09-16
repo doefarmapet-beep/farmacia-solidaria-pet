@@ -1,0 +1,318 @@
+/* ==========================================================================
+   1. CONFIGURAÇÕES GERAIS E VARIÁVEIS
+   ========================================================================== */
+:root {
+  --laranja-principal: #2D6A4F;
+  --laranja-hover: #2D6A4F;
+  --azul-principal: #0284c7;
+  --azul-hover: #0369a1;
+  --fundo-escuro: #58CD98;
+  --texto-escuro: #1e293b;
+  --texto-corpo: #475569;
+  --borda: #cbd5e1;
+  --sucesso: #10b981;
+  --erro: #ef4444;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--texto-escuro);
+  background-color: var(--fundo-escuro);
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   2. ESTRUTURA DOS CARDS DE AUTENTICAÇÃO E TELA INICIAL
+   ========================================================================== */
+.welcome-container,
+.auth-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-image: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), url('logo2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.welcome-card,
+.auth-card {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  padding: 2.5rem 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  max-width: 440px;
+  width: 100%;
+  border-top: 5px solid var(--laranja-principal);
+  text-align: center;
+}
+
+.auth-card-wide {
+  max-width: 680px; /* Largura expandida para formulários com 2 colunas */
+}
+
+/* Logo e Headers */
+.logo-container {
+  margin-bottom: 1.25rem;
+}
+
+.app-logo {
+  max-width: 160px;
+  height: auto;
+}
+
+.badge {
+  display: inline-block;
+  background-color: #ffedd5;
+  color: var(--laranja-hover);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  margin-bottom: 1rem;
+}
+
+.auth-header {
+  margin-bottom: 1.5rem;
+}
+
+.auth-header h1,
+.welcome-card h1 {
+  font-size: 1.5rem;
+  color: var(--texto-escuro);
+  font-weight: 800;
+}
+
+.auth-header p,
+.welcome-card p {
+  font-size: 0.875rem;
+  color: var(--texto-corpo);
+  margin-top: 0.5rem;
+}
+
+/* ==========================================================================
+   3. FORMULÁRIOS, INPUTS E GRIDS
+   ========================================================================== */
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.form-row .input-group {
+  flex: 1;
+}
+
+.flex-2 {
+  flex: 2 !important;
+}
+
+.flex-small {
+  flex: 0.5 !important;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.input-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--texto-escuro);
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--borda);
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-group input:focus {
+  border-color: var(--azul-principal);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+/* Estilo para campos somente de leitura (ViaCEP) */
+.input-readonly {
+  background-color: #f1f5f9;
+  color: var(--texto-corpo);
+  border-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.cep-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+/* Olhinho na Senha */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  padding-right: 2.75rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.toggle-password:hover {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   4. BOTÕES E LINKS DE NAVEGAÇÃO
+   ========================================================================== */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  display: inline-block;
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary {
+  background-color: var(--laranja-principal);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: var(--laranja-hover);
+}
+
+.btn-secondary {
+  background-color: var(--azul-principal);
+  color: #ffffff;
+}
+
+.btn-secondary:hover {
+  background-color: var(--azul-hover);
+}
+
+.btn-full {
+  margin-top: 0.5rem;
+}
+
+/* Rodapés e Links Secundários */
+.forgot-wrapper {
+  text-align: right;
+  margin-bottom: 1.25rem;
+}
+
+.forgot-link,
+.btn-link {
+  font-size: 0.8125rem;
+  color: var(--azul-principal);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-link:hover,
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.auth-footer,
+.sub-actions {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.auth-footer {
+  flex-direction: column;
+}
+
+.divider {
+  color: #94a3b8;
+  font-size: 0.8125rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--texto-corpo);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  color: var(--texto-escuro);
+}
+
+.footer-text {
+  font-size: 0.875rem;
+  color: var(--texto-corpo);
+}
+
+/* ==========================================================================
+   5. RESPONSIVIDADE (DISPOSITIVOS MÓVEIS)
+   ========================================================================== */
+@media (max-width: 600px) {
+  .welcome-card,
+  .auth-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flex-small,
+  .flex-2 {
+    flex: 1 !important;
+  }
+}
