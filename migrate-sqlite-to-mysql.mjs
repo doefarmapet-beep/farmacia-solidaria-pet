@@ -3,20 +3,14 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createConnection } from 'mysql2/promise';
+import { mysqlConfig } from './database-config.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const sourcePath = process.env.FARMACIA_SQLITE_PATH || resolve(root, 'data/farmacia-solidaria.sqlite');
 if (!existsSync(sourcePath)) throw new Error(`Banco SQLite não encontrado: ${sourcePath}`);
 
 const sqlite = new DatabaseSync(sourcePath, { readOnly: true });
-const mysql = await createConnection({
-  host: process.env.MYSQL_HOST || '127.0.0.1',
-  port: Number(process.env.MYSQL_PORT || 3306),
-  user: process.env.MYSQL_USER || 'farmacia',
-  password: process.env.MYSQL_PASSWORD || 'dev-only-farmacia-password',
-  database: process.env.MYSQL_DATABASE || 'farmacia_solidaria',
-  charset: 'utf8mb4',
-});
+const mysql = await createConnection(mysqlConfig());
 
 try {
   const schema = readFileSync(resolve(root, 'data/schema.mysql.sql'), 'utf8');

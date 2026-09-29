@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { createHash, randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import { createPool } from 'mysql2/promise';
+import { mysqlConfig } from './database-config.mjs';
 import { readFileSync, statSync } from 'node:fs';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,21 +11,25 @@ const scrypt = promisify(scryptCallback);
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const port = Number(process.env.PORT || 3000);
 const database = createPool({
-  host: process.env.MYSQL_HOST || '127.0.0.1',
-  port: Number(process.env.MYSQL_PORT || 3306),
-  user: process.env.MYSQL_USER || 'farmacia',
-  password: process.env.MYSQL_PASSWORD || 'dev-only-farmacia-password',
-  database: process.env.MYSQL_DATABASE || 'farmacia_solidaria',
+  ...mysqlConfig(),
   waitForConnections: true,
   connectionLimit: 10,
-  charset: 'utf8mb4',
 });
 
-async function initializeDatabase() {
-  const schema = readFileSync(resolve(root, 'data/schema.mysql.sql'), 'utf8');
-  for (const statement of schema.split(';').map((sql) => sql.trim()).filter(Boolean)) {
-    await database.query(statement);
+let databaseInitialization;
+function initializeDatabase() {
+  if (!databaseInitialization) {
+    databaseInitialization = (async () => {
+      const schema = readFileSync(resolve(root, 'data/schema.mysql.sql'), 'utf8');
+      for (const statement of schema.split(';').map((sql) => sql.trim()).filter(Boolean)) {
+        await database.query(statement);
+      }
+    })().catch((error) => {
+      databaseInitialization = undefined;
+      throw error;
+    });
   }
+  return databaseInitialization;
 }
 
 const publicUserFields = 'id, name, phone, email, birth_date, postal_code, street, district, city, state, number, complement';
@@ -81,6 +86,10 @@ function validateProfile(profile) {
 
 function hashToken(token) {
   return createHash('sha256').update(token).digest('hex');
+}
+
+function sessionCookieFlags() {
+  return `HttpOnly; SameSite=Strict; Path=/${process.env.VERCEL ? '; Secure' : ''}`;
 }
 
 function isUniqueConstraint(error) {
@@ -147,7 +156,7 @@ async function handleApi(request, response, url) {
     await database.execute('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)',
       [hashToken(token), user.id, Date.now() + 7 * 24 * 60 * 60 * 1000]);
     return sendJson(response, 200, { message: 'Login realizado.' }, {
-      'Set-Cookie': `farmacia_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${7 * 24 * 60 * 60}`,
+      'Set-Cookie': `farmacia_session=${token}; ${sessionCookieFlags()}; Max-Age=${7 * 24 * 60 * 60}`,
     });
   }
 
@@ -158,7 +167,7 @@ async function handleApi(request, response, url) {
       if (token) await database.execute('DELETE FROM sessions WHERE token_hash = ?', [hashToken(decodeURIComponent(token))]);
     }
     return sendJson(response, 200, { message: 'Sessão encerrada.' }, {
-      'Set-Cookie': 'farmacia_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0',
+      'Set-Cookie': `farmacia_session=; ${sessionCookieFlags()}; Max-Age=0`,
     });
   }
 
@@ -250,12 +259,25 @@ const server = createServer(async (request, response) => {
   }
 });
 
+export async function handleVercelRequest(request, response) {
+  try {
+    await initializeDatabase();
+    const url = new URL(request.url, `https://${request.headers.host || 'localhost'}`);
+    await handleApi(request, response, url);
+  } catch (error) {
+    if (!response.headersSent) sendJson(response, error.status || 500, { error: error.status ? error.message : 'Erro interno do servidor.' });
+    else response.destroy();
+    if (!error.status) console.error(error);
+  }
+}
+
 async function startServer() {
   try {
     await initializeDatabase();
     server.listen(port, process.env.HOST || '127.0.0.1', () => {
       console.log(`DoeFarmaPet disponível em http://localhost:${port}`);
-      console.log(`MySQL: ${process.env.MYSQL_HOST || '127.0.0.1'}:${process.env.MYSQL_PORT || 3306}/${process.env.MYSQL_DATABASE || 'farmacia_solidaria'}`);
+      const mysqlTarget = process.env.MYSQL_URL || `${process.env.MYSQL_HOST || '127.0.0.1'}:${process.env.MYSQL_PORT || 3306}/${process.env.MYSQL_DATABASE || 'farmacia_solidaria'}`;
+      console.log(`MySQL: ${process.env.MYSQL_URL ? 'URL configurada' : mysqlTarget}`);
     });
   } catch (error) {
     console.error(`Não foi possível conectar ao MySQL: ${error.message}`);
@@ -264,4 +286,4 @@ async function startServer() {
   }
 }
 
-startServer();
+if (!process.env.VERCEL) startServer();

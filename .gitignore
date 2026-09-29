@@ -3,3 +3,4 @@ data/*.sqlite-shm
 data/*.sqlite-wal
 .env
 node_modules/
+.vercel/
