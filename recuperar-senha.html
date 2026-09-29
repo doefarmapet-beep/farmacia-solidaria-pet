@@ -24,7 +24,7 @@
 
       <div class="auth-header">
         <h1>Recuperar Senha</h1>
-        <p>Informe o seu e-mail cadastrado para receber as instruções de redefinição</p>
+        <p>A recuperação por e-mail não está configurada para o banco local.</p>
       </div>
 
       <form id="form-recuperar" onsubmit="solicitarRecuperacao(event)">
@@ -33,23 +33,31 @@
           <input type="email" id="email" required placeholder="seu@email.com" autocomplete="email">
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full">Enviar Instruções</button>
+        <button type="submit" class="btn btn-primary btn-full">Verificar recuperação</button>
       </form>
 
       <div class="auth-footer">
         <p class="footer-text">Lembrou da senha? <a href="login.html" class="forgot-link">Voltar ao Login</a></p>
-        <a href="../index.html" class="back-link">← Voltar para o início</a>
+        <a href="index.html" class="back-link">← Voltar para o início</a>
       </div>
 
     </div>
   </main>
 
   <script>
-    function solicitarRecuperacao(event) {
+    async function solicitarRecuperacao(event) {
       event.preventDefault();
-      const email = document.getElementById('email').value;
-      alert(`Enviamos um link de redefinição de senha para o e-mail: ${email}`);
-      window.location.href = "login.html";
+      try {
+        const resposta = await fetch('/api/password-reset-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: document.getElementById('email').value })
+        });
+        const resultado = await resposta.json();
+        alert(resultado.error || resultado.message);
+      } catch {
+        alert('Não foi possível conectar ao banco local.');
+      }
     }
   </script>
 

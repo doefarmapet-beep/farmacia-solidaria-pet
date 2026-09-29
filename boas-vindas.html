@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoeFarmaPet - Boas-vindas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="welcome-container">
+        <div class="welcome-card">
+            <span class="badge">Farmácia Solidária Pet</span>
+            <h1 id="welcome-title">Boas-vindas ao DoeFarmaPet</h1>
+            <p id="welcome-text">Estamos preparando sua conta...</p>
+
+            <div class="actions">
+                <a href="atualiza-cadastro.html" class="btn btn-primary">Meu cadastro</a>
+                <button type="button" class="btn btn-outline" id="logout-button">Sair</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function carregarUsuario() {
+            try {
+                const resposta = await fetch('/api/me');
+                if (!resposta.ok) {
+                    window.location.replace('login.html');
+                    return;
+                }
+
+                const usuario = await resposta.json();
+                document.getElementById('welcome-title').textContent = `Olá, ${usuario.name}`;
+                document.getElementById('welcome-text').textContent = 'Sua conta está conectada.';
+            } catch {
+                document.getElementById('welcome-text').textContent = 'Não foi possível conectar ao servidor local.';
+            }
+        }
+
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            try {
+                const resposta = await fetch('/api/logout', { method: 'POST' });
+                if (resposta.ok) {
+                    window.location.replace('index.html');
+                    return;
+                }
+                alert('Não foi possível encerrar a sessão.');
+            } catch {
+                alert('Não foi possível conectar ao servidor local.');
+            }
+        });
+
+        carregarUsuario();
+    </script>
+</body>
+</html>

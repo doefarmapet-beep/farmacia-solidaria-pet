@@ -62,7 +62,7 @@
           <a href="recuperar-senha.html" class="btn-link">Recuperar Senha</a>
         </div>
 
-        <a href="../index.html" class="back-link">← Voltar para o início</a>
+        <a href="index.html" class="back-link">← Voltar para o início</a>
       </div>
 
     </div>
@@ -83,31 +83,22 @@
       }
     }
 
-    function fazerLogin(event) {
+    async function fazerLogin(event) {
       event.preventDefault(); // Impede o recarregamento da página
-
-      // Pegamos os valores e removemos espaços em branco nas pontas (.trim)
-      const emailDigitado = document.getElementById('email').value.trim().toLowerCase();
-      const senhaDigitada = document.getElementById('senha').value.trim();
-
-      // Credenciais válidas para o teste
-      const emailCorreto = "admin@doefarmapet.com";
-      const senhaCorreta = "123456";
-
-      // Verifica primeiro se o e-mail existe
-      if (emailDigitado !== emailCorreto) {
-        alert("E-mail não cadastrado ou incorreto.");
-      } 
-      // Se o e-mail estiver correto, valida a senha
-      else if (senhaDigitada === senhaCorreta) {
-        alert("Senha digitada corretamente");
-        
-        // Redireciona para a tela inicial ou painel
-        window.location.href = "../index.html"; 
-      } 
-      // Se a senha estiver errada
-      else {
-        alert("Senha incorreta");
+      try {
+        const resposta = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('senha').value
+          })
+        });
+        const resultado = await resposta.json();
+        if (!resposta.ok) throw new Error(resultado.error || 'Não foi possível entrar.');
+        window.location.href = 'boas-vindas.html';
+      } catch (erro) {
+        alert(erro.message || 'Não foi possível conectar ao banco local.');
       }
     }
   </script>

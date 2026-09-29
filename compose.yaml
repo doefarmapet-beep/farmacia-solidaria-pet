@@ -1,0 +1,21 @@
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-dev-only-root-password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-farmacia_solidaria}
+      MYSQL_USER: ${MYSQL_USER:-farmacia}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-dev-only-farmacia-password}
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mysql_data:

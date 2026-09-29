@@ -123,7 +123,7 @@
       <div class="auth-footer">
         <p class="footer-text">Já tem uma conta? <a href="login.html" class="forgot-link">Faça Login</a></p>
         <!-- Volta para a raiz (../index.html) -->
-        <a href="../index.html" class="back-link">← Voltar para o início</a>
+        <a href="index.html" class="back-link">← Voltar para o início</a>
       </div>
 
     </div>
@@ -176,7 +176,7 @@
       }
     }
 
-    function fazerCadastro(event) {
+    async function fazerCadastro(event) {
       event.preventDefault();
       const senha = document.getElementById('senha').value;
       const confirmar = document.getElementById('confirmar-senha').value;
@@ -186,8 +186,34 @@
         return;
       }
 
-      alert("Cadastro realizado com sucesso!");
-      window.location.href = "login.html";
+      const cadastro = {
+        name: document.getElementById('nome').value,
+        phone: document.getElementById('telefone').value,
+        email: document.getElementById('email').value,
+        birth_date: document.getElementById('data-nascimento').value,
+        postal_code: document.getElementById('cep').value,
+        street: document.getElementById('logradouro').value,
+        district: document.getElementById('bairro').value,
+        city: document.getElementById('cidade').value,
+        state: document.getElementById('uf').value,
+        number: document.getElementById('numero').value,
+        complement: document.getElementById('complemento').value,
+        password: senha
+      };
+
+      try {
+        const resposta = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cadastro)
+        });
+        const resultado = await resposta.json();
+        if (!resposta.ok) throw new Error(resultado.error || 'Não foi possível realizar o cadastro.');
+        alert(resultado.message);
+        window.location.href = 'login.html';
+      } catch (erro) {
+        alert(erro.message || 'Não foi possível conectar ao banco local.');
+      }
     }
   </script>
 

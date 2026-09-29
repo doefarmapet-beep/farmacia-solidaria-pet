@@ -123,7 +123,7 @@
       <div class="auth-footer">
         <a href="login.html" class="forgot-link">Cancelar e Voltar ao Login</a>
         <br>
-        <a href="../index.html" class="back-link">← Voltar para o início</a>
+        <a href="index.html" class="back-link">← Voltar para o início</a>
       </div>
 
     </div>
@@ -176,7 +176,29 @@
       }
     }
 
-    function salvarAtualizacao(event) {
+    async function carregarCadastro() {
+      try {
+        const resposta = await fetch('/api/me');
+        if (!resposta.ok) {
+          window.location.href = 'login.html';
+          return;
+        }
+        const cadastro = await resposta.json();
+        const campos = {
+          nome: 'name', telefone: 'phone', email: 'email',
+          'data-nascimento': 'birth_date', cep: 'postal_code',
+          logradouro: 'street', bairro: 'district', cidade: 'city',
+          uf: 'state', numero: 'number', complemento: 'complement'
+        };
+        for (const [id, campo] of Object.entries(campos)) {
+          document.getElementById(id).value = cadastro[campo] || '';
+        }
+      } catch {
+        alert('Não foi possível conectar ao banco local.');
+      }
+    }
+
+    async function salvarAtualizacao(event) {
       event.preventDefault();
       const novaSenha = document.getElementById('nova-senha').value;
       const confirmar = document.getElementById('confirmar-senha').value;
@@ -186,9 +208,37 @@
         return;
       }
 
-      alert("Cadastro atualizado com sucesso!");
-      window.location.href = "login.html";
+      const cadastro = {
+        name: document.getElementById('nome').value,
+        phone: document.getElementById('telefone').value,
+        email: document.getElementById('email').value,
+        birth_date: document.getElementById('data-nascimento').value,
+        postal_code: document.getElementById('cep').value,
+        street: document.getElementById('logradouro').value,
+        district: document.getElementById('bairro').value,
+        city: document.getElementById('cidade').value,
+        state: document.getElementById('uf').value,
+        number: document.getElementById('numero').value,
+        complement: document.getElementById('complemento').value,
+        password: novaSenha
+      };
+
+      try {
+        const resposta = await fetch('/api/me', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cadastro)
+        });
+        const resultado = await resposta.json();
+        if (!resposta.ok) throw new Error(resultado.error || 'Não foi possível atualizar o cadastro.');
+        alert(resultado.message);
+        window.location.href = 'index.html';
+      } catch (erro) {
+        alert(erro.message || 'Não foi possível conectar ao banco local.');
+      }
     }
+
+    carregarCadastro();
   </script>
 
 </body>
