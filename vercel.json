@@ -1,8 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "api/[...path].mjs": {
-      "includeFiles": "data/schema.mysql.sql"
-    }
-  }
+  "rewrites": [
+    { "source": "/nossa-historia", "destination": "/nossa-historia.html" },
+    { "source": "/ongs", "destination": "/ongs.html" },
+    { "source": "/clinicas", "destination": "/clinicas.html" },
+    { "source": "/privacidade", "destination": "/privacidade.html" },
+    { "source": "/privacidades", "destination": "/privacidade.html" },
+    { "source": "/painel", "destination": "/painel.html" }
+  ]
 }

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel - DoeFarmaPet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="site-nav" aria-label="Navegação principal">
+    <a class="site-brand" href="index.html">DoeFarmaPet</a>
+    <div class="site-nav-links">
+      <a href="nossa-historia.html">Nossa história</a>
+      <a href="ongs.html">ONGs</a>
+      <a href="clinicas.html">Clínicas</a>
+      <a href="privacidade.html">Privacidade</a>
+      <a href="painel.html" aria-current="page">Painel</a>
+    </div>
+  </nav>
+  <main class="site-page">
+    <section class="site-page-content" aria-labelledby="panel-title">
+      <span class="badge">Área da conta</span>
+      <h1 id="panel-title">Painel</h1>
+      <p id="panel-status" class="panel-status" role="status">Verificando sua sessão...</p>
+      <div class="actions" id="panel-actions" hidden>
+        <a href="atualiza-cadastro.html" class="btn btn-primary">Atualizar meu cadastro</a>
+        <a href="boas-vindas.html" class="btn btn-outline">Minha conta</a>
+        <button type="button" class="btn btn-outline" id="logout-button">Sair</button>
+      </div>
+      <div class="actions" id="login-actions" hidden>
+        <a href="login.html" class="btn btn-primary">Entrar</a>
+        <a href="cadastro.html" class="btn btn-outline">Criar conta</a>
+      </div>
+      <p class="page-footer"><a href="index.html">Voltar ao início</a></p>
+    </section>
+  </main>
+  <script>
+    const statusElement = document.getElementById('panel-status');
+    const panelActions = document.getElementById('panel-actions');
+    const loginActions = document.getElementById('login-actions');
+
+    async function carregarPainel() {
+      try {
+        const response = await fetch('/api/me');
+        if (response.status === 401) {
+          statusElement.textContent = 'Entre na sua conta para acessar o painel.';
+          loginActions.hidden = false;
+          return;
+        }
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Não foi possível carregar sua conta.');
+        statusElement.textContent = `Olá, ${result.name}. Aqui você pode gerenciar os dados da sua conta.`;
+        panelActions.hidden = false;
+      } catch (error) {
+        statusElement.textContent = error.message || 'Não foi possível conectar ao servidor.';
+      }
+    }
+
+    document.getElementById('logout-button').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/logout', { method: 'POST' });
+        if (!response.ok) throw new Error('Não foi possível encerrar a sessão.');
+        window.location.replace('index.html');
+      } catch (error) {
+        alert(error.message || 'Não foi possível conectar ao servidor.');
+      }
+    });
+
+    carregarPainel();
+  </script>
+</body>
+</html>

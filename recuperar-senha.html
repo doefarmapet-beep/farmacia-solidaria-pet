@@ -24,16 +24,27 @@
 
       <div class="auth-header">
         <h1>Recuperar Senha</h1>
-        <p>A recuperação por e-mail não está configurada para o banco local.</p>
+        <p>Informe seu e-mail para receber as instruções de redefinição de senha.</p>
       </div>
 
       <form id="form-recuperar" onsubmit="solicitarRecuperacao(event)">
-        <div class="input-group">
+        <div class="input-group" id="email-field">
           <label for="email">E-mail Cadastrado</label>
           <input type="email" id="email" required placeholder="seu@email.com" autocomplete="email">
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full">Verificar recuperação</button>
+        <div id="password-fields" hidden>
+          <div class="input-group">
+            <label for="nova-senha">Nova senha</label>
+            <input type="password" id="nova-senha" minlength="6" autocomplete="new-password">
+          </div>
+          <div class="input-group">
+            <label for="confirmar-senha">Confirmar nova senha</label>
+            <input type="password" id="confirmar-senha" minlength="6" autocomplete="new-password">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="submit-button">Enviar instruções</button>
       </form>
 
       <div class="auth-footer">
@@ -45,18 +56,46 @@
   </main>
 
   <script>
+    const recoveryParameters = new URLSearchParams(window.location.hash.slice(1));
+    const recoveryAccessToken = recoveryParameters.get('type') === 'recovery'
+      ? recoveryParameters.get('access_token')
+      : null;
+    if (recoveryAccessToken) {
+      document.getElementById('email-field').hidden = true;
+      document.getElementById('email').required = false;
+      document.getElementById('password-fields').hidden = false;
+      document.getElementById('nova-senha').required = true;
+      document.getElementById('confirmar-senha').required = true;
+      document.getElementById('submit-button').textContent = 'Redefinir senha';
+      document.querySelector('.auth-header p').textContent = 'Escolha uma nova senha para sua conta.';
+    }
+
     async function solicitarRecuperacao(event) {
       event.preventDefault();
       try {
-        const resposta = await fetch('/api/password-reset-request', {
+        const isReset = Boolean(recoveryAccessToken);
+        const password = document.getElementById('nova-senha').value;
+        if (isReset && password !== document.getElementById('confirmar-senha').value) {
+          throw new Error('As senhas não coincidem.');
+        }
+        const resposta = await fetch(isReset ? '/api/password-reset' : '/api/password-reset-request', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: document.getElementById('email').value })
+          body: JSON.stringify(isReset
+            ? { access_token: recoveryAccessToken, password }
+            : { email: document.getElementById('email').value })
         });
         const resultado = await resposta.json();
-        alert(resultado.error || resultado.message);
-      } catch {
-        alert('Não foi possível conectar ao banco local.');
+        if (!resposta.ok) throw new Error(resultado.error || 'Não foi possível redefinir a senha.');
+        if (isReset) {
+          history.replaceState(null, '', window.location.pathname);
+          alert(resultado.message);
+          window.location.replace('login.html');
+          return;
+        }
+        alert(resultado.message);
+      } catch (erro) {
+        alert(erro.message || 'Não foi possível enviar as instruções. Confira o link e tente novamente.');
       }
     }
   </script>

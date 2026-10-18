@@ -98,7 +98,7 @@
         if (!resposta.ok) throw new Error(resultado.error || 'Não foi possível entrar.');
         window.location.href = 'boas-vindas.html';
       } catch (erro) {
-        alert(erro.message || 'Não foi possível conectar ao banco local.');
+        alert(erro.message || 'Não foi possível conectar ao servidor.');
       }
     }
   </script>

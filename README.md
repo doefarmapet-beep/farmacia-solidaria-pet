@@ -1,32 +1,37 @@
 # farmacia-solidaria-pet
 Protótipo web para doação e solicitação de medicamentos veterinários da Farmácia Solidária Pet.
 
-## MySQL local
+## Supabase
 
-Requisitos: Node.js 22.13 ou superior e Docker Compose. Configure o ambiente e inicie o MySQL:
+Cadastro, login, sessões e perfis são armazenados no Supabase Auth e PostgreSQL. Configure o ambiente local:
 
 ```sh
 cp .env.example .env
 npm install
-npm run db:up
 ```
 
-O banco fica em um volume Docker persistente. Para migrar os cadastros do SQLite antigo, execute `npm run db:migrate-sqlite` uma vez, antes de iniciar a aplicação. A migração preserva IDs, hashes de senha e sessões; ela exige que o banco MySQL ainda não tenha usuários.
+No painel do Supabase, abra **SQL Editor** e execute [`data/schema.supabase.sql`](./data/schema.supabase.sql). O script cria a tabela `profiles`, ativa RLS, permite que cada pessoa consulte e atualize somente o próprio perfil e cria o perfil automaticamente durante o cadastro. Também cria `partners`, que aceita solicitações públicas apenas com estado `pending` e permite leitura pública somente dos campos não sensíveis dos parceiros aprovados.
 
-Inicie a aplicação:
+O arquivo `.env.example` contém a URL do projeto e a chave pública `anon` fornecidas para este site. Inicie o servidor:
 
 ```sh
 npm start
 ```
 
-Abra `http://localhost:3000`. O servidor cria as tabelas automaticamente. As configurações de conexão estão no `.env` e podem ser alteradas conforme o MySQL local.
+Abra `http://localhost:3000`. A aplicação usa o servidor como intermediário e guarda os tokens de sessão em cookies `HttpOnly`. Não configure nem exponha uma chave `service_role`.
 
-O cadastro, login, sessão e perfil usam o MySQL. A recuperação por e-mail depende de um serviço de envio que não está configurado neste protótipo local.
+Em **Authentication → URL Configuration**, configure o endereço do site e permita a URL de recuperação definida em `SUPABASE_RECOVERY_REDIRECT_URL` (localmente, `http://localhost:3000/recuperar-senha.html`; ajuste para o domínio publicado). A confirmação de e-mail pode ser habilitada em **Authentication → Providers → Email**. O envio de confirmação e recuperação depende da configuração de e-mail/SMTP do projeto.
 
 ## Publicar na Vercel
 
-Importe este repositório na Vercel. As páginas HTML/CSS são servidas como arquivos estáticos e `api/[...path].mjs` atende às rotas da API.
+Importe este repositório na Vercel. As páginas HTML/CSS são servidas como arquivos estáticos e `api/[...path].mjs` atende às rotas da API. Configure `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_RECOVERY_REDIRECT_URL` nas variáveis de ambiente de Production, Preview e Development e execute o SQL acima no projeto Supabase antes de publicar.
 
-No projeto da Vercel, configure `MYSQL_URL` com a URL pública do MySQL no Railway. Configure `MYSQL_SSL=true` se o endpoint do Railway exigir TLS. Não use a URL privada `*.railway.internal`, pois ela não é acessível pela Vercel. A função cria as tabelas na primeira requisição; para preservar cadastros já existentes, importe-os para o banco Railway antes de publicar.
+O banco MySQL antigo não é migrado automaticamente. Contas existentes precisam ser migradas para o Supabase Auth ou cadastradas novamente.
 
-Cada ambiente Vercel (Production, Preview e Development) precisa de suas próprias variáveis MySQL. Depois de importar o repositório e definir as variáveis, faça o deploy pelo painel ou envie um novo commit para a branch conectada.
+## Páginas do site
+
+O menu inicial dá acesso às páginas de história, ONGs, clínicas, privacidade e painel da conta. Nas páginas de ONGs e clínicas, organizações podem enviar uma solicitação pública de cadastro. As solicitações ficam pendentes e não são exibidas até aprovação manual. Contatos de e-mail e telefone são armazenados para análise pela equipe, mas não são publicados.
+
+Para analisar solicitações, abra **Table Editor → partners** no Supabase. E-mail e telefone ficam privados e não são incluídos na consulta pública. Confira os dados e altere `status` para `approved` para publicar o parceiro, ou `rejected` para recusá-lo. Nunca dê permissões de atualização dessa tabela à função `anon`. O texto de privacidade é inicial e deve ser revisado pela equipe responsável antes da publicação definitiva.
+
+Depois de atualizar o esquema com a tabela `partners`, execute novamente o conteúdo completo de [`data/schema.supabase.sql`](./data/schema.supabase.sql) no SQL Editor do Supabase. As instruções são idempotentes e aplicam as permissões necessárias.

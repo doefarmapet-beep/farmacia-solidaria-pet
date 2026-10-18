@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ONGs - DoeFarmaPet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="site-nav" aria-label="Navegação principal">
+    <a class="site-brand" href="index.html">DoeFarmaPet</a>
+    <div class="site-nav-links">
+      <a href="nossa-historia.html">Nossa história</a>
+      <a href="ongs.html" aria-current="page">ONGs</a>
+      <a href="clinicas.html">Clínicas</a>
+      <a href="privacidade.html">Privacidade</a>
+      <a href="painel.html">Painel</a>
+    </div>
+  </nav>
+  <main class="site-page">
+    <article class="site-page-content">
+      <span class="badge">Rede de apoio</span>
+      <h1>ONGs e organizações</h1>
+      <p>Queremos aproximar organizações de proteção animal da comunidade DoeFarmaPet para fortalecer o cuidado com os animais.</p>
+      <p id="partners-status" class="panel-status" role="status">Carregando organizações aprovadas...</p>
+      <div id="partners-list" class="partner-list"></div>
+      <h2>É uma organização e quer participar?</h2>
+      <p>Envie seus dados para análise. O cadastro só ficará público depois da aprovação da equipe.</p>
+      <p class="partner-privacy">O e-mail e telefone serão usados pela equipe para análise e contato. Eles não serão exibidos na página pública.</p>
+      <form id="partner-form" class="partner-form">
+        <input type="hidden" name="partner_type" value="ong">
+        <div class="input-group">
+          <label for="partner-name">Nome da organização</label>
+          <input id="partner-name" name="name" required minlength="2" maxlength="160" autocomplete="organization">
+        </div>
+        <div class="form-row">
+          <div class="input-group">
+            <label for="partner-email">E-mail de contato</label>
+            <input id="partner-email" name="email" type="email" required maxlength="320" autocomplete="email">
+          </div>
+          <div class="input-group">
+            <label for="partner-phone">Telefone de contato</label>
+            <input id="partner-phone" name="phone" type="tel" required minlength="8" maxlength="40" autocomplete="tel">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="input-group flex-2">
+            <label for="partner-city">Cidade</label>
+            <input id="partner-city" name="city" required maxlength="120" autocomplete="address-level2">
+          </div>
+          <div class="input-group flex-small">
+            <label for="partner-state">Estado (UF)</label>
+            <input id="partner-state" name="state" required minlength="2" maxlength="2" pattern="[A-Za-z]{2}" autocomplete="address-level1">
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="partner-website">Site (opcional)</label>
+          <input id="partner-website" name="website" type="url" maxlength="500" placeholder="https://">
+        </div>
+        <div class="input-group">
+          <label for="partner-description">Apresentação</label>
+          <textarea id="partner-description" name="description" required maxlength="1200" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar para aprovação</button>
+      </form>
+      <p class="page-footer"><a href="index.html">Voltar ao início</a></p>
+    </article>
+  </main>
+  <script>
+    const partnersStatus = document.getElementById('partners-status');
+    const partnersList = document.getElementById('partners-list');
+    const partnerForm = document.getElementById('partner-form');
+
+    async function carregarParceiros() {
+      try {
+        const response = await fetch('/api/partners?type=ong');
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Não foi possível carregar as organizações.');
+        if (result.length === 0) {
+          partnersStatus.textContent = 'Ainda não há organizações aprovadas para exibição.';
+          return;
+        }
+        partnersStatus.textContent = `${result.length} organização(ões) parceira(s).`;
+        for (const partner of result) {
+          const card = document.createElement('article');
+          card.className = 'partner-card';
+          const title = document.createElement('h3');
+          title.textContent = partner.name;
+          const location = document.createElement('p');
+          location.textContent = `${partner.city}, ${partner.state}`;
+          const description = document.createElement('p');
+          description.textContent = partner.description;
+          card.append(title, location, description);
+          if (partner.website) {
+            const website = document.createElement('a');
+            website.href = partner.website;
+            website.target = '_blank';
+            website.rel = 'noopener noreferrer';
+            website.textContent = 'Visitar site';
+            card.append(website);
+          }
+          partnersList.append(card);
+        }
+      } catch (error) {
+        partnersStatus.textContent = error.message || 'Não foi possível conectar ao servidor.';
+      }
+    }
+
+    partnerForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const submitButton = partnerForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      try {
+        const response = await fetch('/api/partners', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.fromEntries(new FormData(partnerForm))),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Não foi possível enviar a solicitação.');
+        partnerForm.reset();
+        alert(result.message);
+      } catch (error) {
+        alert(error.message || 'Não foi possível conectar ao servidor.');
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    carregarParceiros();
+  </script>
+</body>
+</html>

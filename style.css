@@ -228,6 +228,16 @@ body {
   background-color: var(--laranja-hover);
 }
 
+.btn-outline {
+  border: 1px solid var(--laranja-principal);
+  background: transparent;
+  color: var(--laranja-principal);
+}
+
+.btn-outline:hover {
+  background: #ecfdf5;
+}
+
 .btn-secondary {
   background-color: var(--azul-principal);
   color: #ffffff;
@@ -297,6 +307,177 @@ body {
   color: var(--texto-corpo);
 }
 
+.site-nav {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  min-height: 4rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem max(1.25rem, calc((100% - 1100px) / 2));
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+.site-brand {
+  color: var(--laranja-principal);
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem 1rem;
+}
+
+.site-nav-links a {
+  color: var(--texto-escuro);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-nav-links a:hover,
+.site-nav-links a:focus-visible {
+  color: var(--laranja-principal);
+  text-decoration: underline;
+}
+
+.site-page {
+  min-height: 100vh;
+  padding: 7rem 1.25rem 3rem;
+  background: #f1f8f4;
+}
+
+.site-page-content {
+  width: min(100%, 900px);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
+}
+
+.site-page-content h1 {
+  margin-bottom: 0.75rem;
+  color: var(--texto-escuro);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.site-page-content h2 {
+  margin: 1.5rem 0 0.5rem;
+  color: var(--texto-escuro);
+  font-size: 1.2rem;
+}
+
+.site-page-content p,
+.site-page-content li {
+  color: var(--texto-corpo);
+}
+
+.site-page-content p + p {
+  margin-top: 0.75rem;
+}
+
+.site-page-content ul {
+  margin: 0.5rem 0 0 1.25rem;
+}
+
+.site-page-content .actions {
+  max-width: 22rem;
+}
+
+.page-notice {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-left: 4px solid var(--azul-principal);
+  border-radius: 0.25rem;
+  background: #eff6ff;
+}
+
+.page-notice p {
+  color: #1e3a5f;
+}
+
+.page-footer {
+  margin-top: 1.5rem;
+}
+
+.page-footer a {
+  color: var(--azul-principal);
+  font-weight: 600;
+}
+
+.panel-status {
+  margin-top: 1rem;
+}
+
+.partner-form {
+  margin-top: 1rem;
+}
+
+.partner-form textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--borda);
+  border-radius: 0.5rem;
+  font: inherit;
+  resize: vertical;
+}
+
+.partner-form textarea:focus {
+  border-color: var(--azul-principal);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.partner-form button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.partner-privacy {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.partner-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.partner-card {
+  padding: 1.25rem;
+  border: 1px solid var(--borda);
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.partner-card h3 {
+  margin-bottom: 0.5rem;
+  color: var(--texto-escuro);
+}
+
+.partner-card p + p,
+.partner-card a {
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.partner-card a {
+  color: var(--azul-principal);
+  font-weight: 600;
+}
+
 /* ==========================================================================
    5. RESPONSIVIDADE (DISPOSITIVOS MÓVEIS)
    ========================================================================== */
@@ -314,5 +495,20 @@ body {
   .flex-small,
   .flex-2 {
     flex: 1 !important;
+  }
+
+  .site-nav {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .site-nav-links {
+    justify-content: flex-start;
+    gap: 0.35rem 0.75rem;
+  }
+
+  .site-nav-links a {
+    font-size: 0.8rem;
   }
 }
